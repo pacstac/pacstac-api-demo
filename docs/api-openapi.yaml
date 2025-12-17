@@ -1,0 +1,138 @@
+openapi: 3.0.3
+info:
+  title: PacStac Consumer Attestation API
+  version: 0.1.0
+servers:
+  - url: https://pacstac.com/v1
+paths:
+  /verify:
+    post:
+      summary: Verify stewardship for a wallet + asset at a point in time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyRequest"
+      responses:
+        "200":
+          description: Verification result (shape may evolve)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /attestations/{attestationId}:
+    get:
+      summary: Fetch an attestation by ID
+      parameters:
+        - name: attestationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Attestation (shape may evolve)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /.well-known/jwks.json:
+    get:
+      summary: Fetch JWKS (public keys for attestation verification)
+      responses:
+        "200":
+          description: JWKS
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Jwks"
+  /bindings/{bindingId}/events:
+    get:
+      summary: Fetch binding audit events
+      parameters:
+        - name: bindingId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+      responses:
+        "200":
+          description: Audit events (shape may evolve)
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+components:
+  schemas:
+    VerifyRequest:
+      type: object
+      required: [wallet, asset]
+      additionalProperties: false
+      properties:
+        wallet:
+          type: object
+          required: [chain, address]
+          additionalProperties: false
+          properties:
+            chain:
+              type: string
+              example: eip155:1
+            address:
+              type: string
+              example: "0xABC..."
+        asset:
+          type: object
+          required: [type, ref]
+          additionalProperties: false
+          properties:
+            type:
+              type: string
+              enum: [domain]
+            ref:
+              type: object
+              additionalProperties: true
+              properties:
+                domain:
+                  type: string
+                  example: example.com
+        asOf:
+          type: string
+          format: date-time
+          example: "2025-12-15T17:10:00Z"
+        require:
+          type: object
+          additionalProperties: false
+          properties:
+            maxAgeSeconds:
+              type: integer
+              example: 172800
+            notRevoked:
+              type: boolean
+              example: true
+    Jwks:
+      type: object
+      required: [keys]
+      additionalProperties: false
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
