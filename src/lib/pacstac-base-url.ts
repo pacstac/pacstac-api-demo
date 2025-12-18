@@ -3,8 +3,9 @@ function stripTrailingSlashes(url: string) {
 }
 
 export function getPacstacBaseUrl() {
-  const raw = stripTrailingSlashes(process.env.PACSTAC_BASE_URL ?? "https://pacstac.com");
+  const env =
+    typeof process !== "undefined" && process.env ? (process.env as Record<string, string | undefined>) : {};
+  const raw = stripTrailingSlashes(env.PACSTAC_BASE_URL ?? "https://pacstac.com");
   if (raw.endsWith("/v1")) return raw.slice(0, -3);
   return raw;
 }
-

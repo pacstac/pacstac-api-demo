@@ -26,7 +26,13 @@ export function EventsDemo() {
     setResult(null);
     try {
       const response = await fetch(url);
-      const data = (await response.json()) as unknown;
+      const text = await response.text();
+      let data: unknown = text;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { raw: text };
+      }
       if (!response.ok) setError(`HTTP ${response.status}`);
       setResult(data);
     } catch (e) {
@@ -87,4 +93,3 @@ export function EventsDemo() {
     </div>
   );
 }
-

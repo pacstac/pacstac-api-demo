@@ -15,7 +15,13 @@ export function JwksDemo() {
     setResult(null);
     try {
       const response = await fetch("/api/pacstac/jwks");
-      const data = (await response.json()) as unknown;
+      const text = await response.text();
+      let data: unknown = text;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        data = { raw: text };
+      }
       if (!response.ok) setError(`HTTP ${response.status}`);
       setResult(data);
     } catch (e) {
@@ -44,4 +50,3 @@ export function JwksDemo() {
     </div>
   );
 }
-
